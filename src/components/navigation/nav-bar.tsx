@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 
 import Logo from "./logo";
 import UserProfile from "./user-profile";
+import { LogIn } from "lucide-react";
 
 const NavBar = async () => {
   const session = await auth();
@@ -27,7 +28,9 @@ const NavBar = async () => {
             </>
           ) : (
             <Button asChild variant="outline" className="">
-              <Link href="/auth/login">Sign In</Link>
+              <Link href="/auth/login">
+                <LogIn className="w-4 h-4 mr-2" /> Login
+              </Link>
             </Button>
           )}
         </ul>
