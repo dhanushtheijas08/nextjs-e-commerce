@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Inter as FontSans } from "next/font/google";
+import { League_Spartan } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-
-const fontSans = FontSans({
+import { ThemeProvider } from "@/components/theme-provider";
+import NavBar from "@/components/navigation/nav-bar";
+const leagueSpartan = League_Spartan({
   subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-spartan",
 });
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -19,13 +20,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={cn(
-          "min-h-screen bg-background font-sans antialiased",
-          fontSans.variable
-        )}
-      >
-        {children}
+      <body className={cn("font-sans antialiased", leagueSpartan.variable)}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <div className="mt-16">
+            <NavBar />
+          </div>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

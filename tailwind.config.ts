@@ -19,7 +19,7 @@ const config = {
     },
     extend: {
       fontFamily: {
-        sans: ["var(--font-sans)", ...fontFamily.sans],
+        spartan: ["var(--font-spartan)", ...fontFamily.sans],
       },
       colors: {
         border: "hsl(var(--border))",

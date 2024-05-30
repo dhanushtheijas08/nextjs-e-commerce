@@ -1,8 +1,9 @@
-import { SignInButton } from "@/components/sign-in-button";
-export default async function Home() {
+const Page = () => {
   return (
-    <div>
-      <SignInButton />
+    <div className="">
+      <p className="text-2xl">Sample text</p>
     </div>
   );
-}
+};
+
+export default Page;

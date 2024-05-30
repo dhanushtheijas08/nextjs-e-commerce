@@ -8,6 +8,11 @@ datasource db {
   directUrl = env("POSTGRES_URL_NON_POOLING") 
 }
 
+enum Role {
+  USER 
+  ADMIN
+}
+
 model User {
   id            String          @id @default(cuid())
   name          String?
@@ -15,7 +20,8 @@ model User {
   emailVerified DateTime?
   image         String?
   accounts      Account[]
-  
+  role Role @default(USER)
+  twoFactorEnabled Boolean @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
