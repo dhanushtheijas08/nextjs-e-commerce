@@ -5,12 +5,8 @@ import { useForm } from "react-hook-form";
 
 import AuthCard from "@/components/auth/auth-card";
 
-import Link from "next/link";
-
-import { useAction } from "next-safe-action/hooks";
-
-import type { LoginInput } from "@/schema/authSchema";
-import { loginSchema } from "@/schema/authSchema";
+import { registerSchema } from "@/schema/authSchema";
+import type { registerInput } from "@/schema/authSchema";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -23,31 +19,52 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { login } from "@/actions/authAction";
+import { useAction } from "next-safe-action/hooks";
+import { register } from "@/actions/authAction";
 
-const LoginForm = () => {
-  const form = useForm<LoginInput>({
-    resolver: zodResolver(loginSchema),
+const RegisterForm = () => {
+  const form = useForm<registerInput>({
+    resolver: zodResolver(registerSchema),
   });
-  // "idle" | "executing" | "hasSucceeded" | "hasErrored";
-  const { execute, status } = useAction(login, {
+  const { execute, status } = useAction(register, {
     onSuccess: (data) => {
       console.log(data);
     },
+    onError: (data) => {
+      console.log(data);
+    },
   });
-  const onSubmit = (data: LoginInput) => {
-    const { email, password } = data;
-    execute({ email, password });
+  const onSubmit = (data: registerInput) => {
+    const { email, password, username } = data;
+    execute({ email, password, username });
   };
   return (
     <AuthCard
-      cardTitle="Welcome back"
-      cardDescription="Enter your email below to login to your account."
+      cardTitle="Create an account"
+      cardDescription="Enter your email below to create an account"
       showSocialLogin
-      authCardType="login"
+      authCardType="register"
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="dhanush theijas"
+                    type="text"
+                    disabled={status === "executing"}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name="email"
@@ -59,7 +76,6 @@ const LoginForm = () => {
                     placeholder="sara@gmail.com"
                     type="email"
                     disabled={status === "executing"}
-                    autoComplete="email"
                     {...field}
                   />
                 </FormControl>
@@ -72,22 +88,12 @@ const LoginForm = () => {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="flex justify-between items-center">
-                  <span>Password</span>
-
-                  <Link
-                    href="/auth/forgot-password"
-                    className="text-sm underline"
-                  >
-                    Forgot your password?
-                  </Link>
-                </FormLabel>
+                <FormLabel>Password</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="**********"
+                    placeholder="********"
                     type="password"
                     disabled={status === "executing"}
-                    autoComplete="current-password"
                     {...field}
                   />
                 </FormControl>
@@ -114,4 +120,4 @@ const LoginForm = () => {
   );
 };
 
-export default LoginForm;
+export default RegisterForm;
