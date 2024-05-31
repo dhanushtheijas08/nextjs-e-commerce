@@ -10,7 +10,6 @@ import { LogIn } from "lucide-react";
 
 const NavBar = async () => {
   const session = await auth();
-  console.log(session);
   return (
     <header className="mx-auto flex justify-between items-center backdrop-blur-md py-3 px-5 fixed inset-x-0 top-0 z-50 border-b border-white/5">
       <Logo />

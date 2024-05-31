@@ -1,67 +1,58 @@
 "use server";
 
-import { hash, compare } from "bcrypt";
-
+import { hash } from "bcrypt";
 import { createSafeActionClient } from "next-safe-action";
-import { loginSchema, registerSchema } from "@/schema/authSchema";
+
 import prisma from "@/lib/db";
-import { generateRandomToken } from "@/lib/utils";
-const action = createSafeActionClient();
-
-export const generateVerificationToken = async (email: string) => {
-  const userToken = generateRandomToken();
-
-  await prisma.verificationToken.create({
-    data: {
-      email,
-      token: userToken.token,
-      expires: userToken.expiresAt,
-    },
-  });
-};
-
-export const deleteVerificationToken = async (
-  token: string,
-  tokenId: string
-) => {
-  const deletedToken = await prisma.verificationToken.delete({
-    where: {
-      id_token: {
-        id: tokenId,
-        token,
-      },
-    },
-  });
-
-  return deletedToken;
-};
-
-export const verifyToken = async (token: string, email: string) => {
-  const verificationToken = await prisma.verificationToken.findFirst({
-    where: {
-      token,
-    },
-  });
-
-  if (!verificationToken || verificationToken.email !== email) {
-    throw new Error("Invalid token");
-  }
-
-  if (verificationToken.expires < new Date()) {
-    throw new Error("Token expired");
-  }
-
-  return verificationToken;
-};
+import { loginSchema, registerSchema } from "@/schema/authSchema";
+import { generateVerificationToken } from "./tokenAction";
+import { sendVerificationEmail } from "./emailAction";
+import { signIn } from "@/lib/auth";
+const action = createSafeActionClient({});
 
 export const login = action(loginSchema, async ({ email, password }) => {
-  console.log(email, password);
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (!user) throw new Error("User Not Exist");
+
+    if (!user.emailVerified) throw new Error("Email not verified");
+
+    await signIn("credentials", {
+      email: user.email,
+      password,
+      redirectTo: "/",
+    });
+
+    return {
+      status: "success",
+      message: "User logged in successfully",
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      return {
+        status: "error",
+        message: error.message,
+      };
+    } else {
+      return {
+        status: "error",
+        message: "An unknown error occurred",
+      };
+    }
+  }
 });
 
 export const register = action(
   registerSchema,
   async ({ email, password, username }) => {
     try {
+      if (!email || !password || !username)
+        throw new Error("All fields are required");
       const existingUser = await prisma.user.findFirst({
         where: {
           email,
@@ -80,7 +71,10 @@ export const register = action(
           name: username,
         },
       });
-      console.log(user);
+      if (user) {
+        const verificationToken = await generateVerificationToken(email);
+        await sendVerificationEmail(email, verificationToken.token);
+      }
 
       return {
         status: "success",
@@ -88,10 +82,7 @@ export const register = action(
       };
     } catch (error) {
       if (error instanceof Error) {
-        return {
-          status: "error",
-          message: error.message,
-        };
+        return { status: "error", message: error.message };
       } else {
         return {
           status: "error",

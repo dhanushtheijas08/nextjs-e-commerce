@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
+import { useRouter } from "next/navigation";
 import AuthCard from "@/components/auth/auth-card";
 
 import { registerSchema } from "@/schema/authSchema";
@@ -21,19 +22,28 @@ import {
 import { Input } from "@/components/ui/input";
 import { useAction } from "next-safe-action/hooks";
 import { register } from "@/actions/authAction";
+import { toast } from "sonner";
 
 const RegisterForm = () => {
+  const router = useRouter();
   const form = useForm<registerInput>({
     resolver: zodResolver(registerSchema),
   });
   const { execute, status } = useAction(register, {
     onSuccess: (data) => {
-      console.log(data);
-    },
-    onError: (data) => {
-      console.log(data);
+      if (data.status === "success") {
+        const message = data.message;
+        toast.success(message);
+        router.replace("/auth/verify-email/pending");
+      }
+
+      if (data.status === "error") {
+        const message = data.message;
+        toast.error(message);
+      }
     },
   });
+
   const onSubmit = (data: registerInput) => {
     const { email, password, username } = data;
     execute({ email, password, username });

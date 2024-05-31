@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { League_Spartan } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
+
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -20,7 +22,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={cn("font-sans antialiased", leagueSpartan.variable)}>
+      <body
+        className={cn("font-sans antialiased py-5", leagueSpartan.variable)}
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -31,6 +35,7 @@ export default function RootLayout({
             <NavBar />
           </div>
           {children}
+          <Toaster position="top-right" />
         </ThemeProvider>
       </body>
     </html>

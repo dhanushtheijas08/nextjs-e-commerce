@@ -24,15 +24,16 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { login } from "@/actions/authAction";
+import { useRouter } from "next/navigation";
 
 const LoginForm = () => {
+  const router = useRouter();
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
   });
-  // "idle" | "executing" | "hasSucceeded" | "hasErrored";
   const { execute, status } = useAction(login, {
     onSuccess: (data) => {
-      console.log(data);
+      if (data.status === "success") router.replace("/");
     },
   });
   const onSubmit = (data: LoginInput) => {
