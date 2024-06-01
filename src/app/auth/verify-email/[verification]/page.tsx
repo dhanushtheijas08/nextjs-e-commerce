@@ -13,8 +13,10 @@ import Link from "next/link";
 const VerificationStatus = ({
   params,
 }: {
-  params: { verification: "pending" | "verified" | "error" };
+  params: { verification: "pending" | "error" };
 }) => {
+  console.log(params.verification);
+
   return (
     <Card className="w-[450px] py-5">
       <CardHeader>
@@ -22,7 +24,6 @@ const VerificationStatus = ({
           {
             {
               pending: "Verify your email",
-              verified: "Email verified successfully",
               error: "Error verifying email",
             }[params.verification]
           }
@@ -35,10 +36,8 @@ const VerificationStatus = ({
             {
               pending:
                 "To start using the application, please verify your email.",
-              verified:
-                "Your email has been successfully verified. You can now use all features of the application.",
               error:
-                "There was an error verifying your email. Please try again or contact support.",
+                "There was an error verifying your email. Please try to register again or contact support.",
             }[params.verification]
           }
         </p>
@@ -56,17 +55,10 @@ const VerificationStatus = ({
             </Button>
           </>
         )}
-        {params.verification === "verified" && (
-          <>
-            <Button className="w-full" asChild>
-              <Link href={`${getBaseUrl()}/dashboard`}>Go to Login</Link>
-            </Button>
-          </>
-        )}
         {params.verification === "error" && (
           <>
             <Button className="w-full" asChild variant="outline">
-              <Link href={`${getBaseUrl()}/`}>Back To Home</Link>
+              <Link href="/auth/register">Back To Register</Link>
             </Button>
             <Button className="w-full" asChild>
               <Link href={`${getBaseUrl()}/contact-support`}>

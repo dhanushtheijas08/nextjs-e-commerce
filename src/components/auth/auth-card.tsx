@@ -13,7 +13,7 @@ type AuthCardProps = {
   children: React.ReactNode;
   cardTitle: string;
   cardDescription: string;
-  authCardType: "login" | "register";
+  authCardType: "login" | "register" | "email-verification";
   showSocialLogin?: boolean;
 };
 const AuthCard = ({
@@ -36,31 +36,33 @@ const AuthCard = ({
       )}
       <CardContent>{children}</CardContent>
 
-      <CardFooter className="flex justify-center">
-        {authCardType === "login" ? (
-          <>
-            <span className="text-muted-foreground">
-              {`Don't`} have an account?
-            </span>
-            <Link
-              href="/auth/register"
-              className="ml-1 underline text-card-foreground"
-            >
-              Sign up
-            </Link>
-          </>
-        ) : (
-          <>
-            <span className="text-muted-foreground">Already an user?</span>
-            <Link
-              href="/auth/login"
-              className="ml-1 underline text-card-foreground"
-            >
-              Login
-            </Link>
-          </>
-        )}
-      </CardFooter>
+      {authCardType !== "email-verification" && (
+        <CardFooter className="flex justify-center">
+          {authCardType === "login" ? (
+            <>
+              <span className="text-muted-foreground">
+                {`Don't`} have an account?
+              </span>
+              <Link
+                href="/auth/register"
+                className="ml-1 underline text-card-foreground"
+              >
+                Sign up
+              </Link>
+            </>
+          ) : (
+            <>
+              <span className="text-muted-foreground">Already an user?</span>
+              <Link
+                href="/auth/login"
+                className="ml-1 underline text-card-foreground"
+              >
+                Login
+              </Link>
+            </>
+          )}
+        </CardFooter>
+      )}
     </Card>
   );
 };

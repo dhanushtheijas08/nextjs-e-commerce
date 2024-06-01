@@ -8,32 +8,54 @@ import { loginSchema, registerSchema } from "@/schema/authSchema";
 import { generateVerificationToken } from "./tokenAction";
 import { sendVerificationEmail } from "./emailAction";
 import { signIn } from "@/lib/auth";
+import { AuthError } from "next-auth";
+import { revalidatePath } from "next/cache";
 const action = createSafeActionClient({});
 
 export const login = action(loginSchema, async ({ email, password }) => {
   try {
-    const user = await prisma.user.findUnique({
-      where: {
-        email,
-      },
-    });
-
-    if (!user) throw new Error("User Not Exist");
-
-    if (!user.emailVerified) throw new Error("Email not verified");
-
-    await signIn("credentials", {
-      email: user.email,
+    if (!email || !password) throw new Error("All fields are required");
+    const user = await signIn("credentials", {
+      email: email,
       password,
-      redirectTo: "/",
+      redirect: false,
     });
+    if (!user)
+      throw new Error(
+        "Access denied. Please check your credentials and try again."
+      );
 
     return {
       status: "success",
       message: "User logged in successfully",
     };
   } catch (error) {
-    if (error instanceof Error) {
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case "AccessDenied":
+          return {
+            status: "error",
+            message:
+              "Access denied. Please check your credentials and try again.",
+          };
+        case "CredentialsSignin":
+          console.log(error.message);
+          return {
+            status: "error",
+            message: error.message.split("Read")[0],
+          };
+        case "EmailSignInError":
+          return {
+            status: "error",
+            message: "Error with email sign-in. Please try again later.",
+          };
+        default:
+          return {
+            status: "error",
+            message: "An authentication error occurred. Please try again.",
+          };
+      }
+    } else if (error instanceof Error) {
       return {
         status: "error",
         message: error.message,
@@ -41,7 +63,7 @@ export const login = action(loginSchema, async ({ email, password }) => {
     } else {
       return {
         status: "error",
-        message: "An unknown error occurred",
+        message: "Something went wrong. Please try again later.",
       };
     }
   }
@@ -60,6 +82,11 @@ export const register = action(
       });
 
       if (existingUser) {
+        if (!existingUser.emailVerified) {
+          const verificationToken = await generateVerificationToken(email);
+          await sendVerificationEmail(email, verificationToken.token);
+          throw new Error("Email not verified. Verification email sent");
+        }
         throw new Error("User already exists");
       }
       const hashedPassword = await hash(password, 10);

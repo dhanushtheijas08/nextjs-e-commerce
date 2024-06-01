@@ -25,15 +25,27 @@ import {
 import { Input } from "@/components/ui/input";
 import { login } from "@/actions/authAction";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const LoginForm = () => {
   const router = useRouter();
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
   });
   const { execute, status } = useAction(login, {
     onSuccess: (data) => {
-      if (data.status === "success") router.replace("/");
+      if (data.status === "success") {
+        toast.success(data.message);
+        router.replace("/");
+        router.refresh();
+      } else if (data.status === "error") {
+        toast.error(data.message);
+        form.reset();
+      }
     },
   });
   const onSubmit = (data: LoginInput) => {

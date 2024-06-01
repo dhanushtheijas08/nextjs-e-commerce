@@ -20,31 +20,3 @@ export const deleteVerificationToken = async (token: string) => {
   });
   return deletedToken;
 };
-
-export const verifyToken = async (token: string, email: string) => {
-  try {
-    const verificationToken = await prisma.verificationToken.findFirst({
-      where: {
-        token,
-      },
-    });
-    if (!verificationToken || verificationToken.email !== email) {
-      throw new Error("Invalid token");
-    }
-    if (verificationToken.expires < new Date()) {
-      throw new Error("Token expired");
-    }
-    await deleteVerificationToken(verificationToken.token);
-    await prisma.user.update({
-      where: {
-        email,
-      },
-      data: {
-        emailVerified: new Date(),
-      },
-    });
-    return true;
-  } catch (error) {
-    console.log(error);
-  }
-};
