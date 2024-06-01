@@ -21,9 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={cn("font-sans antialiased py-5", leagueSpartan.variable)}
-      >
+      <body className={cn("font-sans antialiased", leagueSpartan.variable)}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
