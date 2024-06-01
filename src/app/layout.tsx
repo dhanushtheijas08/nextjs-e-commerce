@@ -5,7 +5,6 @@ import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
-import NavBar from "@/components/navigation/nav-bar";
 const leagueSpartan = League_Spartan({
   subsets: ["latin"],
   variable: "--font-spartan",
@@ -31,11 +30,8 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="mt-16">
-            <NavBar />
-          </div>
           {children}
-          <Toaster position="top-right" />
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>
