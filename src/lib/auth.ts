@@ -14,9 +14,53 @@ import { CredentialsSignin } from "@auth/core/errors";
 class CustomError extends CredentialsSignin {
   code = "custom";
 }
+
+enum Role {
+  USER,
+  ADMIN,
+}
 export const { auth, handlers, signIn, signOut } = NextAuth({
-  session: { strategy: "jwt" },
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60,
+  },
   adapter: PrismaAdapter(prisma),
+  callbacks: {
+    async session({ session, token }) {
+      if (session && token.sub) {
+        session.user.id = token.sub;
+      }
+      if (session.user && token.email) {
+        session.user.role = token.role as Role;
+      }
+
+      if (session.user) {
+        session.user.name = token.name;
+        session.user.email = token.email!;
+        session.user.image = token.image as string;
+        session.user.emailVerified = token.emailVerified as Date;
+        session.user.isOAuth = token.isOAuth as boolean;
+      }
+      return session;
+    },
+
+    async jwt({ token }) {
+      if (!token.sub) return token;
+      let user = await prisma.user.findUnique({
+        where: { id: token.sub },
+      });
+      if (!user) return token;
+
+      token.id = user.id;
+      token.email = user.email;
+      token.image = user.image;
+      token.role = user.role;
+      token.emailVerified = user.emailVerified;
+      token.isOAuth = user.password ? false : true;
+
+      return token;
+    },
+  },
   providers: [
     GitHub,
     Google,

@@ -6,15 +6,28 @@ import { Button } from "@/components/ui/button";
 
 import Logo from "./logo";
 import UserProfile from "./user-profile";
-import { LogIn } from "lucide-react";
+import { LogIn, Search } from "lucide-react";
+import { Input } from "../ui/input";
 
 const NavBar = async () => {
   const session = await auth();
   return (
-    <header className="flex justify-between items-center backdrop-blur-md px-5 py-2 border-t-2 sticky top-0 z-50 border-b border-accent">
+    <header className="flex justify-between items-center backdrop-blur-md px-5 py-2 border-t-2 border-b border-accent">
       <Logo />
+
       <nav>
         <ul className="flex items-center gap-5">
+          <form className="w-[350px]">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search products..."
+                className="w-full appearance-none bg-background pl-8 shadow-none"
+              />
+            </div>
+          </form>
+
           {session?.user ? (
             <>
               <UserProfile

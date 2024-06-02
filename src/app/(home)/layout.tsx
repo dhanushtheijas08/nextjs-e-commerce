@@ -5,7 +5,7 @@ type MainLayoutProps = {
 };
 const MainLayout = ({ children }: MainLayoutProps) => {
   return (
-    <main>
+    <main className="overflow-y-hidden h-screen">
       <NavBar />
       {children}
     </main>
