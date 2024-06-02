@@ -23,7 +23,7 @@ const SettingsPage = async () => {
   //   role: user.user.role,
   // };
   return (
-    <div className="grid grid-cols-3 gap-5 overflow-y-auto h-screen">
+    <div className="grid grid-cols-3 gap-5 p-2 ">
       {Array.from({ length: 10 }).map((_, i) => (
         <>
           <div className="h-80 w-64" key={i}>
