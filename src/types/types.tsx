@@ -12,3 +12,10 @@ export type UserSession = {
   isOAuth: boolean | null;
   role: Role;
 };
+
+export type NavItem = {
+  title: string;
+  href: string;
+  icon: string;
+  label: string;
+};

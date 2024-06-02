@@ -9,7 +9,6 @@ import { generateVerificationToken } from "./tokenAction";
 import { sendVerificationEmail } from "./emailAction";
 import { signIn } from "@/lib/auth";
 import { AuthError } from "next-auth";
-import { revalidatePath } from "next/cache";
 const action = createSafeActionClient({});
 
 export const login = action(loginSchema, async ({ email, password }) => {

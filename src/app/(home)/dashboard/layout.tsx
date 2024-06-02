@@ -1,7 +1,3 @@
-import Link from "next/link";
-import { Home, LineChart, Package, ShoppingCart, Users } from "lucide-react";
-
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+import DashboardNav from "@/components/dashboard/dashboard-nav";
 type DashboardLayoutProps = {
   children: React.ReactNode;
 };
@@ -21,46 +18,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     <div className="flex h-full">
       <div className="hidden md:block w-[220px] lg:w-[280px] h-full border-r overflow-y-auto">
         <div className="flex flex-col h-full">
-          <nav className="px-2 text-sm font-medium lg:px-4">
-            <Link
-              href="#"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-            >
-              <Home className="h-4 w-4" />
-              Dashboard
-            </Link>
-            <Link
-              href="#"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-            >
-              <ShoppingCart className="h-4 w-4" />
-              Orders
-              <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
-                6
-              </Badge>
-            </Link>
-            <Link
-              href="#"
-              className="flex items-center gap-3 rounded-lg bg-muted px-3 py-2 text-primary transition-all hover:text-primary"
-            >
-              <Package className="h-4 w-4" />
-              Products{" "}
-            </Link>
-            <Link
-              href="#"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-            >
-              <Users className="h-4 w-4" />
-              Customers
-            </Link>
-            <Link
-              href="#"
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-            >
-              <LineChart className="h-4 w-4" />
-              Analytics
-            </Link>
-          </nav>
+          <DashboardNav />
+
           <div className="mt-auto mb-14 p-4">
             <Card>
               <CardHeader className="p-2 pt-0 md:p-4">
@@ -79,7 +38,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           </div>
         </div>
       </div>
-      <ScrollArea className="flex-1 mb-16">{children}</ScrollArea>
+      <ScrollArea className="flex-1 mb-14">{children}</ScrollArea>
     </div>
   );
 };
