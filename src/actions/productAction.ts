@@ -3,6 +3,8 @@
 import prisma from "@/lib/db";
 import { productSchema } from "@/schema/productSchema";
 import { createSafeActionClient } from "next-safe-action";
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
 
 const action = createSafeActionClient();
 
@@ -39,6 +41,35 @@ export const createProductAction = action(
     return {
       status: "success",
       message: "Product created successfully",
+    };
+  }
+);
+
+export const deleteProductAction = action(
+  z.object({ id: z.coerce.number() }),
+  async ({ id }) => {
+    if (!id)
+      return {
+        status: "error",
+        message: "Product ID is required",
+      };
+    const product = await prisma.product.delete({
+      where: {
+        id,
+      },
+    });
+
+    if (!product)
+      return {
+        status: "error",
+        message: "Product not deleted",
+      };
+
+    revalidatePath("/dashboard/products");
+
+    return {
+      status: "success",
+      message: "Product deleted successfully",
     };
   }
 );

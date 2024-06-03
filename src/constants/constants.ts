@@ -13,6 +13,12 @@ export const navItems: NavItem[] = [
     icon: "products",
     label: "products",
   },
+  {
+    title: "Products",
+    href: "/dashboard/products",
+    icon: "products",
+    label: "products",
+  },
   // {
   //   title: "Dashboard",
   //   href: "/dashboard",
