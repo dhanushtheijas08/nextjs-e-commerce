@@ -46,7 +46,11 @@ const useActionCell = ({ row }: { row: Row<Product> }) => {
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>Edit</DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => route.push(`/dashboard/add-products?id=${id}`)}
+        >
+          Edit
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => execute({ id })}>
           Delete
         </DropdownMenuItem>

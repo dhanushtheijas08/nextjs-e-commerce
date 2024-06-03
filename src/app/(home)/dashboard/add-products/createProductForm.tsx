@@ -19,14 +19,26 @@ import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-const CreateProductForm = () => {
+type CreateProductFormProps = {
+  id: number | undefined;
+  name: string;
+  description: string;
+  price: number;
+};
+
+const CreateProductForm = ({
+  description,
+  id,
+  name,
+  price,
+}: CreateProductFormProps) => {
   const form = useForm<Product>({
     resolver: zodResolver(productSchema),
     defaultValues: {
-      id: "",
-      name: "",
-      price: 0,
-      description: "",
+      id,
+      description,
+      name,
+      price,
     },
   });
 

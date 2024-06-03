@@ -24,6 +24,34 @@ export const createProductAction = action(
         message: parsedProduct.error.errors.map((e) => e.message),
       };
 
+    if (parsedProduct.data.id) {
+      const product = await prisma.product.findUnique({
+        where: {
+          id: parsedProduct.data.id,
+        },
+      });
+      if (!product)
+        return {
+          status: "error",
+          message: "Product not found",
+        };
+
+      await prisma.product.update({
+        where: {
+          id: parsedProduct.data.id,
+        },
+        data: {
+          name: parsedProduct.data.name,
+          description: parsedProduct.data.description,
+          price: parsedProduct.data.price,
+        },
+      });
+      return {
+        status: "success",
+        message: "Product updated successfully",
+      };
+    }
+
     const product = await prisma.product.create({
       data: {
         name: parsedProduct.data.name,
