@@ -17,8 +17,10 @@ import {
   LucideIcon,
   Moon,
   MoreVertical,
+  PackagePlus,
   Pizza,
   Plus,
+  Projector,
   Settings,
   SunMedium,
   Trash,
@@ -57,4 +59,5 @@ export const Icons = {
   sun: SunMedium,
   moon: Moon,
   laptop: Laptop,
+  products: PackagePlus,
 };

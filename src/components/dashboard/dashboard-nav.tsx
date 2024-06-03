@@ -37,7 +37,7 @@ const DashboardNav = () => {
     );
   });
   return (
-    <nav className="px-2 text-sm font-medium lg:px-4">{renderNavItems}</nav>
+    <nav className="px-2 text-sm font-medium lg:px-4 p-4">{renderNavItems}</nav>
   );
 };
 

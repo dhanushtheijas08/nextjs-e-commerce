@@ -3,6 +3,7 @@ import prisma from "@/lib/db";
 import { userProfileSchema } from "@/schema/userProfileSchema";
 import { createSafeActionClient } from "next-safe-action";
 import { compare, hash } from "bcrypt";
+import { revalidatePath } from "next/cache";
 
 const action = createSafeActionClient();
 
@@ -63,6 +64,8 @@ export const userProfileAction = action(userProfileSchema, async (data) => {
     });
 
     if (!user) throw new Error("User data failed to update");
+
+    revalidatePath("/dashboard/profile");
 
     return {
       status: "success",
