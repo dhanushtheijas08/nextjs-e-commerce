@@ -17,6 +17,19 @@ import { useAction } from "next-safe-action/hooks";
 import { deleteProductAction } from "@/actions/productAction";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
 export type Product = {
   id: number;
   price: number;
@@ -28,34 +41,61 @@ export type Product = {
 const useActionCell = ({ row }: { row: Row<Product> }) => {
   const route = useRouter();
   const id = parseInt(row.getValue("id")!);
-  const { execute } = useAction(deleteProductAction, {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const { execute, status } = useAction(deleteProductAction, {
     onSuccess: (data) => {
       if (data.status === "success") toast.success(data.message);
       else toast.error(data.message);
+      setDialogOpen(false);
     },
   });
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-8 w-8 p-0">
-          <span className="sr-only">Open menu</span>
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => route.push(`/dashboard/add-products?id=${id}`)}
-        >
-          Edit
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => execute({ id })}>
-          Delete
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <span className="sr-only">Open menu</span>
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={() => route.push(`/dashboard/add-products?id=${id}`)}
+          >
+            Edit
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setDialogOpen(true)}>
+            Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <AlertDialog open={dialogOpen} onOpenChange={() => setDialogOpen(true)}>
+        {/* <AlertDialogTrigger>Open</AlertDialogTrigger> */}
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your
+              account and remove your data from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={status === "executing"}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={status === "executing"}
+              onClick={() => execute({ id })}
+            >
+              {status === "executing" ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 
