@@ -67,11 +67,34 @@ enum Role {
 
 model ProductVariant {
   id          Int      @id @default(autoincrement())
-  name        String
-  description String
-  price       Float
+  color        String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   productId   Int
   product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productImage ProductImage[]
+  productTag   ProductTag[]
 }
+
+model ProductImage {
+  id          Int      @id @default(autoincrement())
+  url         String
+  productVariantId   Int
+  productVariant     ProductVariant  @relation(fields: [productVariantId], references: [id], onDelete: Cascade)
+}
+
+
+model ProductTag {
+  id         Int      @id @default(autoincrement())
+  productTag String
+  productVariantId   Int
+  productVariant     ProductVariant  @relation(fields: [productVariantId], references: [id], onDelete: Cascade)
+}
+
+// const productWithVariant  = Prisma.validator<Prisma.ProductVariant>()({
+//   // include: { user: true } },
+// });
+
+// export type ProductWithVariant =  .ProductGetPayload<typeof productWithVariant>;
+
+// export type ReferralCodeWithAdminPersonalData = Prisma.ReferralCodeGetPayload<Partial<typeof adminPersonalData>>;

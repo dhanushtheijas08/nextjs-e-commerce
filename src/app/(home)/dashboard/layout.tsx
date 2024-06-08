@@ -20,7 +20,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         <div className="flex flex-col h-full">
           <DashboardNav />
 
-          <div className="mt-auto mb-14 p-4">
+          <div className="mt-auto mb-14 p-4 hidden">
             <Card>
               <CardHeader className="p-2 pt-0 md:p-4">
                 <CardTitle>Upgrade to Pro</CardTitle>

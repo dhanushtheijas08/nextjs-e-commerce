@@ -7,10 +7,10 @@ type MainLayoutProps = {
   children: React.ReactNode;
 };
 const MainLayout = async ({ children }: MainLayoutProps) => {
-  const user = await auth();
-  if (!user) {
-    redirect("auth/login");
-  }
+  // const user = await auth();
+  // if (!user) {
+  //   redirect("auth/login");
+  // }
   return (
     <main className="overflow-y-hidden h-screen">
       <NavBar />

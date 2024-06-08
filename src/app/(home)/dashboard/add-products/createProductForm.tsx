@@ -2,7 +2,8 @@
 import { createProductAction } from "@/actions/productAction";
 import TextEditor from "@/components/dashboard/products/text-editor";
 import Heading from "@/components/heading";
-import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+
 import {
   Form,
   FormControl,
@@ -14,10 +15,24 @@ import {
 import { Input } from "@/components/ui/input";
 import { Product, productSchema } from "@/schema/productSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DollarSign } from "lucide-react";
+import {
+  AlertTriangleIcon,
+  ChevronLeft,
+  ChevronRight,
+  Trash2Icon,
+} from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
-import { useForm } from "react-hook-form";
+import { useState } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 type CreateProductFormProps = {
   id: number | undefined;
@@ -34,6 +49,7 @@ const CreateProductForm = ({
 }: CreateProductFormProps) => {
   const form = useForm<Product>({
     resolver: zodResolver(productSchema),
+    mode: "onChange",
     defaultValues: {
       id,
       description,
@@ -41,7 +57,10 @@ const CreateProductForm = ({
       price,
     },
   });
-
+  const {
+    control,
+    formState: { errors },
+  } = form;
   const { execute, status } = useAction(createProductAction, {
     onSuccess: (data) => {
       console.log(data);
@@ -57,74 +76,386 @@ const CreateProductForm = ({
   const onSubmit = (values: Product) => {
     execute(values);
   };
-  return (
-    <div className="space-y-5 flex flex-col py-5">
-      <Heading className="pl-10">Create Product</Heading>
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-4 pl-10 max-w-lg"
-        >
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Product Name</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Sample Product Name"
-                    {...field}
-                    disabled={status === "executing" ? true : false}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Product Description</FormLabel>
-                <FormControl>
-                  <TextEditor
-                    value={field.value}
-                    disabled={status === "executing" ? true : false}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
 
-          <FormField
-            control={form.control}
-            name="price"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Price</FormLabel>
-                <FormControl>
-                  <div className="flex gap-2 items-center">
-                    <DollarSign className="h-9 w-9 rounded bg-muted p-1.5" />
-                    <Input
-                      placeholder="$5"
-                      {...field}
-                      type="number"
-                      disabled={status === "executing" ? true : false}
+  const [page, setPage] = useState(0);
+
+  const { append, remove, fields } = useFieldArray({
+    control,
+    name: "jobs",
+  });
+
+  const steps = [
+    {
+      id: "Step 1",
+      name: "Personal Information",
+      fields: [
+        "firstname",
+        "lastname",
+        "email",
+        "contactno",
+        "country",
+        "city",
+      ],
+    },
+    {
+      id: "Step 2",
+      name: "Professional Informations",
+      fields: fields
+        ?.map((_, index) => [
+          `jobs.${index}.jobtitle`,
+          `jobs.${index}.employer`,
+          `jobs.${index}.startdate`,
+          `jobs.${index}.enddate`,
+          `jobs.${index}.jobcountry`,
+          `jobs.${index}.jobcity`,
+          // Add other field names as needed
+        ])
+        .flat(),
+    },
+  ];
+  const [previousStep, setPreviousStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [data, setData] = useState({});
+  const delta = currentStep - previousStep;
+
+  const next = async () => {
+    const fields = steps[currentStep].fields;
+
+    const output = await form.trigger(fields, {
+      shouldFocus: true,
+    });
+
+    if (!output) return;
+
+    if (currentStep < steps.length - 1) {
+      // if (currentStep === steps.length - 2) {
+      //   await form.handleSubmit(processForm)();
+      // }
+      setPreviousStep(currentStep);
+      setCurrentStep((step) => step + 1);
+    }
+  };
+
+  const prev = () => {
+    if (currentStep > 0) {
+      setPreviousStep(currentStep);
+      setCurrentStep((step) => step - 1);
+    }
+  };
+
+  const loading = status === "executing" ? true : false;
+
+  return (
+    <div className="space-y-5 flex flex-col py-5 max-w-3xl mx-auto">
+      <Heading className="">{id ? "Edit Product" : "Create Product"}</Heading>
+      <Separator />
+      <div className="max-w-3xl">
+        <ul className="flex gap-4">
+          {steps.map((step, index) => (
+            <li key={step.name} className="md:flex-1">
+              {page > index ? (
+                <div className="group flex w-full flex-col border-l-4 border-sky-600 py-2 pl-4 transition-colors md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4">
+                  <span className="text-sm font-medium text-sky-600 transition-colors ">
+                    {step.id}
+                  </span>
+                  <span className="text-sm font-medium">{step.name}</span>
+                </div>
+              ) : page === index ? (
+                <div
+                  className="flex w-full flex-col border-l-4 border-sky-600 py-2 pl-4 md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4"
+                  aria-current="step"
+                >
+                  <span className="text-sm font-medium text-sky-600">
+                    {step.id}
+                  </span>
+                  <span className="text-sm font-medium">{step.name}</span>
+                </div>
+              ) : (
+                <div className="group flex h-full w-full flex-col border-l-4 border-gray-200 py-2 pl-4 transition-colors md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4">
+                  <span className="text-sm font-medium text-gray-500 transition-colors">
+                    {step.id}
+                  </span>
+                  <span className="text-sm font-medium">{step.name}</span>
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <Separator />
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <div className="w-full space-y-8">
+            {currentStep === 0 && (
+              <>
+                <div className="flex gap-4 w-full">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormLabel>Product Name</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Sample Product Name"
+                            {...field}
+                            disabled={status === "executing" ? true : false}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="price"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormLabel>Price</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="$5"
+                            {...field}
+                            type="number"
+                            disabled={status === "executing" ? true : false}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Product Description</FormLabel>
+                      <FormControl>
+                        <TextEditor
+                          value={field.value}
+                          disabled={status === "executing" ? true : false}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex justify-between">
+                  <Button
+                    className=""
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setPage(page - 1);
+                      // form.
+                    }}
+                  >
+                    <ChevronLeft className="w-6 h-6" />
+                    Products
+                  </Button>
+                  <Button disabled>
+                    Add Varients
+                    <ChevronRight
+                      className="w-6 h-6"
+                      onClick={(e) => e.preventDefault()}
                     />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+                  </Button>
+                </div>
+              </>
             )}
-          />
-          <Button disabled={status === "executing" ? true : false}>
-            Create Product
-          </Button>
+            {currentStep === 1 && (
+              <>
+                {fields?.map((field, index) => (
+                  <Accordion
+                    type="single"
+                    collapsible
+                    defaultValue="item-1"
+                    key={field.id}
+                  >
+                    <AccordionItem value="item-1">
+                      <AccordionTrigger
+                        className={cn(
+                          "relative !no-underline [&[data-state=closed]>button]:hidden [&[data-state=open]>.alert]:hidden",
+                          errors?.jobs?.[index] && "text-red-700"
+                        )}
+                      >
+                        {`Work Experience ${index + 1}`}
+
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="absolute right-8"
+                          onClick={() => remove(index)}
+                        >
+                          <Trash2Icon className="h-4 w-4 " />
+                        </Button>
+                        {errors?.jobs?.[index] && (
+                          <span className="alert absolute right-8">
+                            <AlertTriangleIcon className="h-4 w-4   text-red-700" />
+                          </span>
+                        )}
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div
+                          className={cn(
+                            "relative mb-4 gap-8 rounded-md border p-4 md:grid md:grid-cols-3"
+                          )}
+                        >
+                          <FormField
+                            control={form.control}
+                            name={`jobs.${index}.jobtitle`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Job title</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="text"
+                                    disabled={loading}
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`jobs.${index}.employer`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Employer</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="text"
+                                    disabled={loading}
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`jobs.${index}.startdate`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Start date</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="date"
+                                    disabled={loading}
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`jobs.${index}.enddate`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>End date</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="date"
+                                    disabled={loading}
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                ))}
+
+                <div className="mt-4 flex justify-center">
+                  <Button
+                    type="button"
+                    className="flex justify-center"
+                    size={"lg"}
+                    onClick={() =>
+                      append({
+                        jobtitle: "",
+                        employer: "",
+                        startdate: "",
+                        enddate: "",
+                        jobcountry: "",
+                        jobcity: "",
+                      })
+                    }
+                  >
+                    Add More
+                  </Button>
+                </div>
+              </>
+            )}
+            {currentStep === 2 && (
+              <div>
+                <h1>Completed</h1>
+                <pre className="whitespace-pre-wrap">
+                  {JSON.stringify(data)}
+                </pre>
+              </div>
+            )}
+          </div>
         </form>
       </Form>
+      <div className="mt-8 pt-5">
+        <div className="flex justify-between">
+          <button
+            type="button"
+            onClick={prev}
+            disabled={currentStep === 0}
+            className="rounded bg-white px-2 py-1 text-sm font-semibold text-sky-900 shadow-sm ring-1 ring-inset ring-sky-300 hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="1.5"
+              stroke="currentColor"
+              className="h-6 w-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15.75 19.5L8.25 12l7.5-7.5"
+              />
+            </svg>
+          </button>
+          <button
+            type="button"
+            onClick={next}
+            disabled={currentStep === steps.length - 1}
+            className="rounded bg-white px-2 py-1 text-sm font-semibold text-sky-900 shadow-sm ring-1 ring-inset ring-sky-300 hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="1.5"
+              stroke="currentColor"
+              className="h-6 w-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M8.25 4.5l7.5 7.5-7.5 7.5"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
