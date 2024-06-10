@@ -74,7 +74,8 @@ const CreateProductForm = ({
     },
   });
   const onSubmit = (values: Product) => {
-    execute(values);
+    // execute(values);
+    console.log(values);
   };
 
   const [page, setPage] = useState(0);
@@ -88,57 +89,49 @@ const CreateProductForm = ({
     {
       id: "Step 1",
       name: "Personal Information",
-      fields: [
-        "firstname",
-        "lastname",
-        "email",
-        "contactno",
-        "country",
-        "city",
-      ],
+      fields: ["name", "price", "description"],
     },
     {
       id: "Step 2",
       name: "Professional Informations",
       fields: fields
         ?.map((_, index) => [
-          `jobs.${index}.jobtitle`,
-          `jobs.${index}.employer`,
-          `jobs.${index}.startdate`,
-          `jobs.${index}.enddate`,
-          `jobs.${index}.jobcountry`,
-          `jobs.${index}.jobcity`,
-          // Add other field names as needed
+          `jobs.${index}.jobtitle` as const,
+          `jobs.${index}.employer` as const,
+          `jobs.${index}.startdate` as const,
+          `jobs.${index}.enddate` as const,
+          `jobs.${index}.jobcountry` as const,
+          `jobs.${index}.jobcity` as const,
         ])
         .flat(),
     },
   ];
-  const [previousStep, setPreviousStep] = useState(0);
-  const [currentStep, setCurrentStep] = useState(0);
-  const [data, setData] = useState({});
-  const delta = currentStep - previousStep;
 
+  const [currentStep, setCurrentStep] = useState(0);
+
+  type FieldName = "name" | "price" | "description";
   const next = async () => {
     const fields = steps[currentStep].fields;
-
-    const output = await form.trigger(fields, {
+    const output = await form.trigger(fields as FieldName[], {
       shouldFocus: true,
     });
 
     if (!output) return;
 
     if (currentStep < steps.length - 1) {
-      // if (currentStep === steps.length - 2) {
-      //   await form.handleSubmit(processForm)();
-      // }
-      setPreviousStep(currentStep);
+      console.log(currentStep);
+
+      if (currentStep === steps.length - 2) {
+        // await form.handleSubmit(onSubmit)();
+        // console.log("hu");
+      }
       setCurrentStep((step) => step + 1);
     }
+    console.log(currentStep);
   };
 
   const prev = () => {
     if (currentStep > 0) {
-      setPreviousStep(currentStep);
       setCurrentStep((step) => step - 1);
     }
   };
@@ -243,27 +236,6 @@ const CreateProductForm = ({
                     </FormItem>
                   )}
                 />
-
-                <div className="flex justify-between">
-                  <Button
-                    className=""
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setPage(page - 1);
-                      // form.
-                    }}
-                  >
-                    <ChevronLeft className="w-6 h-6" />
-                    Products
-                  </Button>
-                  <Button disabled>
-                    Add Varients
-                    <ChevronRight
-                      className="w-6 h-6"
-                      onClick={(e) => e.preventDefault()}
-                    />
-                  </Button>
-                </div>
               </>
             )}
             {currentStep === 1 && (
@@ -394,18 +366,10 @@ const CreateProductForm = ({
                       })
                     }
                   >
-                    Add More
+                    Add Varient
                   </Button>
                 </div>
               </>
-            )}
-            {currentStep === 2 && (
-              <div>
-                <h1>Completed</h1>
-                <pre className="whitespace-pre-wrap">
-                  {JSON.stringify(data)}
-                </pre>
-              </div>
             )}
           </div>
         </form>
@@ -436,7 +400,7 @@ const CreateProductForm = ({
           <button
             type="button"
             onClick={next}
-            disabled={currentStep === steps.length - 1}
+            // disabled={currentStep === steps.length - 1}
             className="rounded bg-white px-2 py-1 text-sm font-semibold text-sky-900 shadow-sm ring-1 ring-inset ring-sky-300 hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <svg
