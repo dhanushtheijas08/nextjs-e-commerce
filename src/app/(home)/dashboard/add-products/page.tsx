@@ -8,6 +8,12 @@ type ProductData = {
   price?: number;
   createdAt?: Date;
   updatedAt?: Date;
+
+  productVariants?: {
+    id: number | undefined;
+    name: string;
+    color: number;
+  }[];
 };
 
 const AddProductsPage = async ({
@@ -16,12 +22,18 @@ const AddProductsPage = async ({
   searchParams: { id: string };
 }) => {
   const { id } = searchParams;
-
   let productData: ProductData = {
-    description: "",
     id: undefined,
     name: "",
     price: 0,
+    description: "",
+    productVariants: [
+      {
+        id: undefined,
+        color: 0,
+        name: "",
+      },
+    ],
   };
 
   if (id) {
@@ -29,9 +41,17 @@ const AddProductsPage = async ({
       where: {
         id: +id,
       },
+      include: {
+        productVariant: true,
+      },
     });
     if (product) {
-      productData = product;
+      const productVariants = product.productVariant?.map((variant) => ({
+        id: variant.id,
+        name: variant.name,
+        color: variant.color,
+      }));
+      productData = { ...product, productVariants };
     }
   }
 
@@ -42,6 +62,7 @@ const AddProductsPage = async ({
         id={productData.id || undefined}
         name={productData.name || ""}
         price={productData.price || 0}
+        productVariants={productData.productVariants || []}
       />
     </section>
   );

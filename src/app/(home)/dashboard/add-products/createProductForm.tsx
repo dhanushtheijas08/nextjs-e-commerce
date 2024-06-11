@@ -40,6 +40,11 @@ type CreateProductFormProps = {
   name: string;
   description: string;
   price: number;
+  productVariants: {
+    id: number | undefined;
+    name: string;
+    color: number;
+  }[];
 };
 
 const CreateProductForm = ({
@@ -47,18 +52,25 @@ const CreateProductForm = ({
   id,
   name,
   price,
+  productVariants,
 }: CreateProductFormProps) => {
   const router = useRouter();
+
+  const productDefaultValues = {
+    id: Number(id) || undefined,
+    description: description || "",
+    name: name || "",
+    price: price || 0,
+    variants: productVariants?.map((variant) => ({
+      variantName: variant.name,
+      variantColorCode: variant.color,
+    })) || [{ variantColorCode: 0, variantName: "" }],
+  };
+
   const form = useForm<Product>({
     resolver: zodResolver(productSchema),
     mode: "onChange",
-    defaultValues: {
-      id,
-      description: "sdkahsdhkiqas",
-      name: "askdnssdiwsdkw",
-      price: 80,
-      variants: [{ variantColorCode: 0, variantName: "" }],
-    },
+    defaultValues: productDefaultValues,
   });
   const {
     control,
@@ -76,7 +88,6 @@ const CreateProductForm = ({
     },
   });
   const onSubmit = (values: Product) => {
-    console.log(values);
     execute(values);
   };
 
@@ -117,7 +128,6 @@ const CreateProductForm = ({
 
     if (!output) return;
 
-    console.log(currentStep);
     if (currentStep <= steps.length) {
       if (currentStep === steps.length) {
         form.handleSubmit(onSubmit)();
