@@ -33,6 +33,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useRouter } from "next/navigation";
 
 type CreateProductFormProps = {
   id: number | undefined;
@@ -47,14 +48,16 @@ const CreateProductForm = ({
   name,
   price,
 }: CreateProductFormProps) => {
+  const router = useRouter();
   const form = useForm<Product>({
     resolver: zodResolver(productSchema),
     mode: "onChange",
     defaultValues: {
       id,
-      description,
-      name,
-      price,
+      description: "sdkahsdhkiqas",
+      name: "askdnssdiwsdkw",
+      price: 80,
+      variants: [{ variantColorCode: 0, variantName: "" }],
     },
   });
   const {
@@ -63,10 +66,9 @@ const CreateProductForm = ({
   } = form;
   const { execute, status } = useAction(createProductAction, {
     onSuccess: (data) => {
-      console.log(data);
-
       if (data.status === "success") {
         toast.success(data.message);
+        router.push("/dashboard/products");
         form.reset();
       } else {
         toast.error(data.message[0]);
@@ -74,60 +76,53 @@ const CreateProductForm = ({
     },
   });
   const onSubmit = (values: Product) => {
-    // execute(values);
     console.log(values);
+    execute(values);
   };
 
   const [page, setPage] = useState(0);
 
   const { append, remove, fields } = useFieldArray({
     control,
-    name: "jobs",
+    name: "variants",
   });
 
   const steps = [
     {
       id: "Step 1",
-      name: "Personal Information",
+      name: "Add Product Detials",
       fields: ["name", "price", "description"],
     },
     {
       id: "Step 2",
-      name: "Professional Informations",
+      name: "Add Product variants",
       fields: fields
         ?.map((_, index) => [
-          `jobs.${index}.jobtitle` as const,
-          `jobs.${index}.employer` as const,
-          `jobs.${index}.startdate` as const,
-          `jobs.${index}.enddate` as const,
-          `jobs.${index}.jobcountry` as const,
-          `jobs.${index}.jobcity` as const,
+          `variants.${index}.variantsName` as const,
+          `variants.${index}.variantsColorCode` as const,
         ])
         .flat(),
     },
   ];
 
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(1);
 
-  type FieldName = "name" | "price" | "description";
+  type FieldName = "name" | "price" | "description" | "variants";
   const next = async () => {
-    const fields = steps[currentStep].fields;
+    const fields = steps[currentStep - 1].fields;
+
     const output = await form.trigger(fields as FieldName[], {
       shouldFocus: true,
     });
 
     if (!output) return;
 
-    if (currentStep < steps.length - 1) {
-      console.log(currentStep);
-
-      if (currentStep === steps.length - 2) {
-        // await form.handleSubmit(onSubmit)();
-        // console.log("hu");
-      }
-      setCurrentStep((step) => step + 1);
-    }
     console.log(currentStep);
+    if (currentStep <= steps.length) {
+      if (currentStep === steps.length) {
+        form.handleSubmit(onSubmit)();
+      } else setCurrentStep((step) => step + 1);
+    }
   };
 
   const prev = () => {
@@ -180,7 +175,7 @@ const CreateProductForm = ({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="w-full space-y-8">
-            {currentStep === 0 && (
+            {currentStep === 1 && (
               <>
                 <div className="flex gap-4 w-full">
                   <FormField
@@ -238,7 +233,7 @@ const CreateProductForm = ({
                 />
               </>
             )}
-            {currentStep === 1 && (
+            {currentStep === 2 && (
               <>
                 {fields?.map((field, index) => (
                   <Accordion
@@ -251,7 +246,7 @@ const CreateProductForm = ({
                       <AccordionTrigger
                         className={cn(
                           "relative !no-underline [&[data-state=closed]>button]:hidden [&[data-state=open]>.alert]:hidden",
-                          errors?.jobs?.[index] && "text-red-700"
+                          errors?.variants?.[index] && "text-red-700"
                         )}
                       >
                         {`Work Experience ${index + 1}`}
@@ -264,7 +259,7 @@ const CreateProductForm = ({
                         >
                           <Trash2Icon className="h-4 w-4 " />
                         </Button>
-                        {errors?.jobs?.[index] && (
+                        {errors?.variants?.[index] && (
                           <span className="alert absolute right-8">
                             <AlertTriangleIcon className="h-4 w-4   text-red-700" />
                           </span>
@@ -273,15 +268,15 @@ const CreateProductForm = ({
                       <AccordionContent>
                         <div
                           className={cn(
-                            "relative mb-4 gap-8 rounded-md border p-4 md:grid md:grid-cols-3"
+                            "relative mb-4 gap-8 rounded-md border p-4 md:grid md:grid-cols-2"
                           )}
                         >
                           <FormField
                             control={form.control}
-                            name={`jobs.${index}.jobtitle`}
+                            name={`variants.${index}.variantName`}
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Job title</FormLabel>
+                                <FormLabel>Variant Name</FormLabel>
                                 <FormControl>
                                   <Input
                                     type="text"
@@ -295,47 +290,13 @@ const CreateProductForm = ({
                           />
                           <FormField
                             control={form.control}
-                            name={`jobs.${index}.employer`}
+                            name={`variants.${index}.variantColorCode`}
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Employer</FormLabel>
+                                <FormLabel>Variant Color</FormLabel>
                                 <FormControl>
                                   <Input
-                                    type="text"
-                                    disabled={loading}
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name={`jobs.${index}.startdate`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Start date</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    type="date"
-                                    disabled={loading}
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name={`jobs.${index}.enddate`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>End date</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    type="date"
+                                    type="number"
                                     disabled={loading}
                                     {...field}
                                   />
@@ -357,16 +318,12 @@ const CreateProductForm = ({
                     size={"lg"}
                     onClick={() =>
                       append({
-                        jobtitle: "",
-                        employer: "",
-                        startdate: "",
-                        enddate: "",
-                        jobcountry: "",
-                        jobcity: "",
+                        variantColorCode: 0,
+                        variantName: "",
                       })
                     }
                   >
-                    Add Varient
+                    Add variants
                   </Button>
                 </div>
               </>

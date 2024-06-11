@@ -10,12 +10,13 @@ const action = createSafeActionClient();
 
 export const createProductAction = action(
   productSchema,
-  async ({ id, name, description, price }) => {
+  async ({ id, name, description, price, variants }) => {
     const parsedProduct = productSchema.safeParse({
       id,
       name,
       description,
       price,
+      variants,
     });
 
     if (!parsedProduct.success)
@@ -57,6 +58,14 @@ export const createProductAction = action(
         name: parsedProduct.data.name,
         description: parsedProduct.data.description,
         price: parsedProduct.data.price,
+        productVariant: {
+          createMany: {
+            data: parsedProduct.data.variants.map((variant) => ({
+              name: variant.variantName,
+              color: variant.variantColorCode,
+            })),
+          },
+        },
       },
     });
 
@@ -66,6 +75,7 @@ export const createProductAction = action(
         message: "Product not created",
       };
 
+    revalidatePath("/dashboard/products");
     return {
       status: "success",
       message: "Product created successfully",

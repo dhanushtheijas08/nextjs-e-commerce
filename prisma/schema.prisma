@@ -67,7 +67,8 @@ enum Role {
 
 model ProductVariant {
   id          Int      @id @default(autoincrement())
-  color        String
+  name        String
+  color       Int
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   productId   Int
@@ -90,11 +91,3 @@ model ProductTag {
   productVariantId   Int
   productVariant     ProductVariant  @relation(fields: [productVariantId], references: [id], onDelete: Cascade)
 }
-
-// const productWithVariant  = Prisma.validator<Prisma.ProductVariant>()({
-//   // include: { user: true } },
-// });
-
-// export type ProductWithVariant =  .ProductGetPayload<typeof productWithVariant>;
-
-// export type ReferralCodeWithAdminPersonalData = Prisma.ReferralCodeGetPayload<Partial<typeof adminPersonalData>>;
