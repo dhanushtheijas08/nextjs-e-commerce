@@ -12,27 +12,29 @@ const ProductsPage = async () => {
     orderBy: {
       updatedAt: "desc",
     },
+    include: {
+      productVariant: {
+        select: {
+          id: true,
+          color: true,
+          name: true,
+        },
+      },
+    },
   });
-
   const productData = products.map((product) => {
     return {
       id: product.id,
       title: product.name,
       price: product.price,
-      variants: [],
+      productVariant: product.productVariant,
       image: placeholderImage.src,
     };
   });
-
   return (
     <div className="pl-10 p-2 h-full">
-      <Heading className="">Products</Heading>
-
-      {products.length > 0 ? (
-        <DataTable columns={columns} data={productData} />
-      ) : (
-        <div className="text-center text-gray-500">No products found</div>
-      )}
+      <Heading className="py-6">Products</Heading>
+      <DataTable columns={columns} data={productData} />
     </div>
   );
 };

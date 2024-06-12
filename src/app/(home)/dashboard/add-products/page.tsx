@@ -42,16 +42,17 @@ const AddProductsPage = async ({
         id: +id,
       },
       include: {
-        productVariant: true,
+        productVariant: {
+          select: {
+            id: true,
+            color: true,
+            name: true,
+          },
+        },
       },
     });
     if (product) {
-      const productVariants = product.productVariant?.map((variant) => ({
-        id: variant.id,
-        name: variant.name,
-        color: variant.color,
-      }));
-      productData = { ...product, productVariants };
+      productData = { ...product };
     }
   }
 

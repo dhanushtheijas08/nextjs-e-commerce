@@ -27,14 +27,23 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export type Product = {
   id: number;
   price: number;
   title: string;
-  variants: any;
+  productVariant: {
+    id: number;
+    color: number;
+    name: string;
+  }[];
   image: string;
 };
 
@@ -73,7 +82,6 @@ const useActionCell = ({ row }: { row: Row<Product> }) => {
         </DropdownMenuContent>
       </DropdownMenu>
       <AlertDialog open={dialogOpen} onOpenChange={() => setDialogOpen(true)}>
-        {/* <AlertDialogTrigger>Open</AlertDialogTrigger> */}
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
@@ -97,6 +105,22 @@ const useActionCell = ({ row }: { row: Row<Product> }) => {
       </AlertDialog>
     </>
   );
+};
+const useTooltipCell = ({ row }: { row: Row<Product> }) => {
+  const renderTooltip = row.original.productVariant.map((variant) => {
+    return (
+      <TooltipProvider key={variant.id} delayDuration={200}>
+        <Tooltip>
+          <TooltipTrigger className="h-7 w-7 rounded-full bg-red-300 cursor-pointer"></TooltipTrigger>
+          <TooltipContent>
+            <p> {variant.name} </p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  });
+
+  return <div className="flex gap-2">{renderTooltip}</div>;
 };
 
 export const columns: ColumnDef<Product>[] = [
@@ -125,6 +149,7 @@ export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "variants",
     header: "Variants",
+    cell: useTooltipCell,
   },
   {
     accessorKey: "image",

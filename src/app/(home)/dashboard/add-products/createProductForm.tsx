@@ -3,6 +3,7 @@ import { createProductAction } from "@/actions/productAction";
 import TextEditor from "@/components/dashboard/products/text-editor";
 import Heading from "@/components/heading";
 import { Separator } from "@/components/ui/separator";
+import { useColor } from "react-color-palette";
 
 import {
   Form,
@@ -31,6 +32,7 @@ import {
 import { useRouter } from "next/navigation";
 import NavigationBtn from "@/components/dashboard/products/navigation-btn";
 import StepsIndicator from "@/components/dashboard/products/steps-indicator";
+import MyColorPicker from "@/components/dashboard/color-picker";
 
 type CreateProductFormProps = {
   id: number | undefined;
@@ -52,6 +54,7 @@ const CreateProductForm = ({
   productVariants,
 }: CreateProductFormProps) => {
   const router = useRouter();
+  const [color, setColor] = useColor("rgb(86 30 203)");
 
   const productDefaultValues = {
     id: Number(id) || undefined,
@@ -147,7 +150,7 @@ const CreateProductForm = ({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="w-full space-y-8">
-            {currentStep === 1 && (
+            {currentStep === 2 && (
               <>
                 <div className="flex gap-4 w-full">
                   <FormField
@@ -205,7 +208,7 @@ const CreateProductForm = ({
                 />
               </>
             )}
-            {currentStep === 2 && (
+            {currentStep === 1 && (
               <>
                 {fields?.map((field, index) => (
                   <Accordion
@@ -221,7 +224,7 @@ const CreateProductForm = ({
                           errors?.variants?.[index] && "text-red-700"
                         )}
                       >
-                        {`Work Experience ${index + 1}`}
+                        {`Product Variants ${index + 1}`}
 
                         <div
                           className="absolute right-8 border p-2 rounded-sm border-input bg-background hover:bg-accent hover:text-accent-foreground"
@@ -265,11 +268,12 @@ const CreateProductForm = ({
                               <FormItem>
                                 <FormLabel>Variant Color</FormLabel>
                                 <FormControl>
-                                  <Input
-                                    type="number"
-                                    disabled={loading}
-                                    {...field}
-                                  />
+                                  <div className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                                    <MyColorPicker
+                                      color={color}
+                                      setColor={setColor}
+                                    />
+                                  </div>
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
