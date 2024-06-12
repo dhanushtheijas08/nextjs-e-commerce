@@ -150,7 +150,7 @@ const CreateProductForm = ({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="w-full space-y-8">
-            {currentStep === 2 && (
+            {currentStep === 1 && (
               <>
                 <div className="flex gap-4 w-full">
                   <FormField
@@ -208,7 +208,7 @@ const CreateProductForm = ({
                 />
               </>
             )}
-            {currentStep === 1 && (
+            {currentStep === 2 && (
               <>
                 {fields?.map((field, index) => (
                   <Accordion

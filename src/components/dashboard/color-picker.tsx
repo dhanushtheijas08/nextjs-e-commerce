@@ -28,7 +28,7 @@ const MyColorPicker = ({ color, setColor }: MyColorPickerProps) => {
       ></PopoverTrigger>
       <PopoverContent className="w-[350px] p-0">
         <ColorPicker
-          height={250}
+          height={200}
           color={color}
           onChange={setColor}
           hideInput={["rgb", "hsv"]}
