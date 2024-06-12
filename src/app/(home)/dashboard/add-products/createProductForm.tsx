@@ -15,12 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Product, productSchema } from "@/schema/productSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  AlertTriangleIcon,
-  ChevronLeft,
-  ChevronRight,
-  Trash2Icon,
-} from "lucide-react";
+import { AlertTriangleIcon, Trash2Icon } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -34,6 +29,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { useRouter } from "next/navigation";
+import NavigationBtn from "@/components/dashboard/products/navigation-btn";
+import StepsIndicator from "@/components/dashboard/products/steps-indicator";
 
 type CreateProductFormProps = {
   id: number | undefined;
@@ -87,11 +84,10 @@ const CreateProductForm = ({
       }
     },
   });
+
   const onSubmit = (values: Product) => {
     execute(values);
   };
-
-  const [page, setPage] = useState(0);
 
   const { append, remove, fields } = useFieldArray({
     control,
@@ -142,44 +138,10 @@ const CreateProductForm = ({
   };
 
   const loading = status === "executing" ? true : false;
-
   return (
     <div className="space-y-5 flex flex-col py-5 max-w-3xl mx-auto">
-      <Heading className="">{id ? "Edit Product" : "Create Product"}</Heading>
-      <Separator />
-      <div className="max-w-3xl">
-        <ul className="flex gap-4">
-          {steps.map((step, index) => (
-            <li key={step.name} className="md:flex-1">
-              {page > index ? (
-                <div className="group flex w-full flex-col border-l-4 border-sky-600 py-2 pl-4 transition-colors md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4">
-                  <span className="text-sm font-medium text-sky-600 transition-colors ">
-                    {step.id}
-                  </span>
-                  <span className="text-sm font-medium">{step.name}</span>
-                </div>
-              ) : page === index ? (
-                <div
-                  className="flex w-full flex-col border-l-4 border-sky-600 py-2 pl-4 md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4"
-                  aria-current="step"
-                >
-                  <span className="text-sm font-medium text-sky-600">
-                    {step.id}
-                  </span>
-                  <span className="text-sm font-medium">{step.name}</span>
-                </div>
-              ) : (
-                <div className="group flex h-full w-full flex-col border-l-4 border-gray-200 py-2 pl-4 transition-colors md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4">
-                  <span className="text-sm font-medium text-gray-500 transition-colors">
-                    {step.id}
-                  </span>
-                  <span className="text-sm font-medium">{step.name}</span>
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
-      </div>
+      <Heading>{id ? "Edit Product" : "Create Product"}</Heading>
+      <StepsIndicator currentStep={currentStep} steps={steps} />
       <Separator />
 
       <Form {...form}>
@@ -196,7 +158,7 @@ const CreateProductForm = ({
                         <FormLabel>Product Name</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="Sample Product Name"
+                            placeholder="Sample Product"
                             {...field}
                             disabled={status === "executing" ? true : false}
                           />
@@ -261,14 +223,12 @@ const CreateProductForm = ({
                       >
                         {`Work Experience ${index + 1}`}
 
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="absolute right-8"
+                        <div
+                          className="absolute right-8 border p-2 rounded-sm border-input bg-background hover:bg-accent hover:text-accent-foreground"
                           onClick={() => remove(index)}
                         >
                           <Trash2Icon className="h-4 w-4 " />
-                        </Button>
+                        </div>
                         {errors?.variants?.[index] && (
                           <span className="alert absolute right-8">
                             <AlertTriangleIcon className="h-4 w-4   text-red-700" />
@@ -341,52 +301,7 @@ const CreateProductForm = ({
           </div>
         </form>
       </Form>
-      <div className="mt-8 pt-5">
-        <div className="flex justify-between">
-          <button
-            type="button"
-            onClick={prev}
-            disabled={currentStep === 0}
-            className="rounded bg-white px-2 py-1 text-sm font-semibold text-sky-900 shadow-sm ring-1 ring-inset ring-sky-300 hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="h-6 w-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15.75 19.5L8.25 12l7.5-7.5"
-              />
-            </svg>
-          </button>
-          <button
-            type="button"
-            onClick={next}
-            // disabled={currentStep === steps.length - 1}
-            className="rounded bg-white px-2 py-1 text-sm font-semibold text-sky-900 shadow-sm ring-1 ring-inset ring-sky-300 hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="h-6 w-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M8.25 4.5l7.5 7.5-7.5 7.5"
-              />
-            </svg>
-          </button>
-        </div>
-      </div>
+      <NavigationBtn currentStep={currentStep} next={next} prev={prev} />
     </div>
   );
 };

@@ -19,6 +19,11 @@ export const createProductAction = action(
       variants,
     });
 
+    if (variants.length < 1)
+      return {
+        status: "error",
+        message: "Must provide atlest one variant",
+      };
     if (!parsedProduct.success)
       return {
         status: "error",
