@@ -18,7 +18,7 @@ import { Product, productSchema } from "@/schema/productSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertTriangleIcon, Trash2Icon } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
-import { useState } from "react";
+import { ChangeEvent, useRef, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,10 @@ import { useRouter } from "next/navigation";
 import NavigationBtn from "@/components/dashboard/products/navigation-btn";
 import StepsIndicator from "@/components/dashboard/products/steps-indicator";
 import MyColorPicker from "@/components/dashboard/color-picker";
+import {
+  UploadButton,
+  UploadDropzone,
+} from "@/app/api/uploadthing/uploadthing";
 
 type CreateProductFormProps = {
   id: number | undefined;
@@ -63,8 +67,8 @@ const CreateProductForm = ({
     price: price || 0,
     variants: productVariants?.map((variant) => ({
       variantName: variant.name,
-      variantColorCode: variant.color,
-    })) || [{ variantColorCode: 0, variantName: "" }],
+      variantColorCode: "",
+    })) || [{ variantColorCode: "", variantName: "" }],
   };
 
   const form = useForm<Product>({
@@ -119,6 +123,7 @@ const CreateProductForm = ({
   const [currentStep, setCurrentStep] = useState(1);
 
   type FieldName = "name" | "price" | "description" | "variants";
+
   const next = async () => {
     const fields = steps[currentStep - 1].fields;
 
@@ -151,7 +156,7 @@ const CreateProductForm = ({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="w-full space-y-8">
-            {currentStep === 1 && (
+            {currentStep === 2 && (
               <>
                 <div className="flex gap-4 w-full">
                   <FormField
@@ -209,7 +214,7 @@ const CreateProductForm = ({
                 />
               </>
             )}
-            {currentStep === 2 && (
+            {currentStep === 1 && (
               <>
                 {fields?.map((field, index) => (
                   <Accordion
@@ -240,9 +245,25 @@ const CreateProductForm = ({
                         )}
                       </AccordionTrigger>
                       <AccordionContent>
+                        <FormField
+                          control={form.control}
+                          name={`variants.${index}.variantName`}
+                          render={({ field }) => (
+                            <FormItem className="px-2 mb-2">
+                              <FormLabel>Variant Images</FormLabel>
+                              <FormControl>
+                                <UploadDropzone
+                                  endpoint="productVariantImage"
+                                  className="mt-2 flex flex-col items-center justify-center rounded-lg border border-dashed border-gray-900/25 px-6 text-center ut-label:text-sm ut-allowed-content:ut-uploading:text-red-300 py-2.5 dark:bg-zinc-800"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                         <div
                           className={cn(
-                            "relative mb-4 gap-8 rounded-md border p-4 md:grid md:grid-cols-2"
+                            "relative mb-4 gap-8 p-2 md:grid md:grid-cols-2"
                           )}
                         >
                           <FormField
@@ -272,6 +293,7 @@ const CreateProductForm = ({
                                   <div className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
                                     <MyColorPicker
                                       color={color}
+                                      onFieldChange={field.onChange}
                                       setColor={setColor}
                                     />
                                   </div>
@@ -293,8 +315,9 @@ const CreateProductForm = ({
                     size={"lg"}
                     onClick={() =>
                       append({
-                        variantColorCode: 0,
+                        variantColorCode: "",
                         variantName: "",
+                        variantImages: [],
                       })
                     }
                   >

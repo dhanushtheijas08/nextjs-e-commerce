@@ -14,9 +14,14 @@ import { cn } from "@/lib/utils";
 type MyColorPickerProps = {
   color: IColor;
   setColor: Dispatch<SetStateAction<IColor>>;
+  onFieldChange: (hexval: string) => void;
 };
 
-const MyColorPicker = ({ color, setColor }: MyColorPickerProps) => {
+const MyColorPicker = ({
+  color,
+  setColor,
+  onFieldChange,
+}: MyColorPickerProps) => {
   let bgColor = "#fff";
   if (color.hex) bgColor = color.hex;
 
@@ -30,7 +35,10 @@ const MyColorPicker = ({ color, setColor }: MyColorPickerProps) => {
         <ColorPicker
           height={200}
           color={color}
-          onChange={setColor}
+          onChange={(newColor) => {
+            setColor(newColor);
+            onFieldChange(newColor.hex);
+          }}
           hideInput={["rgb", "hsv"]}
         />
       </PopoverContent>

@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+const MAX_UPLOAD_SIZE = 1024 * 1024 * 8;
+const ACCEPTED_FILE_TYPES = ["image/png"];
+
 export const productSchema = z.object({
   id: z.coerce.number().optional(),
   name: z.string().min(5, {
@@ -22,9 +25,29 @@ export const productSchema = z.object({
         .min(3, { message: "variant name must be at least 3 characters" })
         .max(50, { message: "variant name must be at least 3 characters" }),
 
-      variantColorCode: z.coerce.number({
-        message: "Color Code must be a number",
+      variantColorCode: z.string({
+        message: "Color Code is required",
       }),
+
+      variantImages: z.array(
+        z.object({
+          file: z
+            .instanceof(File)
+            .refine(
+              (file) => {
+                return !file || file.size <= MAX_UPLOAD_SIZE;
+              },
+              {
+                message: `File size must be less than ${
+                  MAX_UPLOAD_SIZE / 1024 / 1024
+                }MB`,
+              }
+            )
+            .refine((file) => {
+              return ACCEPTED_FILE_TYPES.includes(file.type);
+            }, "File must be a PNG"),
+        })
+      ),
     })
   ),
 });

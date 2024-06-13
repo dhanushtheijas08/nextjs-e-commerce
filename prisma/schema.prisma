@@ -68,7 +68,7 @@ enum Role {
 model ProductVariant {
   id          Int      @id @default(autoincrement())
   name        String
-  color       Int
+  color       String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   productId   Int
